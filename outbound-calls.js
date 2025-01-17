@@ -114,20 +114,20 @@ export function registerOutboundRoutes(fastify) {
             console.log("[ElevenLabs] Connected to Conversational AI");
 
             // Send initial configuration with prompt and first message
-            const initialConfig = {
+            /*const initialConfig = {
               type: "conversation_initiation_client_data",
               conversation_config_override: {
                 agent: {
                   prompt: { prompt: customParameters?.prompt || "you are a gary from the phone store" },
-                  first_message: "ciao",
+                  first_message: "Sono Giulia, assistente di Dentista-Italia. Ho visto che hai fatto richiesta per informazioni per un Impianto dentale",
                 },
               }
-            };
+            };*/
 
-            console.log("[ElevenLabs] Sending initial config with prompt:", initialConfig.conversation_config_override.agent.prompt.prompt);
+            //console.log("[ElevenLabs] Sending initial config with prompt:", initialConfig.conversation_config_override.agent.prompt.prompt);
 
             // Send the configuration to ElevenLabs
-            elevenLabsWs.send(JSON.stringify(initialConfig));
+            //elevenLabsWs.send(JSON.stringify(initialConfig));
           });
 
           elevenLabsWs.on("message", (data) => {
@@ -195,8 +195,9 @@ export function registerOutboundRoutes(fastify) {
             console.error("[ElevenLabs] WebSocket error:", error);
           });
 
-          elevenLabsWs.on("close", () => {
+          elevenLabsWs.on("close", (code, reason) => {
             console.log("[ElevenLabs] Disconnected");
+            console.log(`Close code: ${code}, Reason: ${reason}`);
           });
 
         } catch (error) {

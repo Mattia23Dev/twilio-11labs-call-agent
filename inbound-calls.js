@@ -82,8 +82,9 @@ export function registerInboundRoutes(fastify) {
         });
 
         // Handle close event for ElevenLabs WebSocket
-        elevenLabsWs.on("close", () => {
+        elevenLabsWs.on("close", (code, reason) => {
           console.log("[II] Disconnected.");
+          console.log(`Close code: ${code}, Reason: ${reason}`);
         });
 
         // Function to handle messages from ElevenLabs
