@@ -86,7 +86,7 @@ export function registerOutboundRoutes(fastify) {
         </Connect>
       </Response>`;
 
-    reply.type("text/xml").send(twimlResponse);
+      reply.type("text/xml").send(twimlResponse);
   });
 
   // WebSocket route for handling media streams
@@ -107,6 +107,7 @@ export function registerOutboundRoutes(fastify) {
       const setupElevenLabs = async () => {
         try {
           const signedUrl = await getSignedUrl();
+          console.log("[ElevenLabs] Signed URL:", signedUrl);
           elevenLabsWs = new WebSocket(signedUrl);
 
           elevenLabsWs.on("open", () => {
@@ -118,7 +119,7 @@ export function registerOutboundRoutes(fastify) {
               conversation_config_override: {
                 agent: {
                   prompt: { prompt: customParameters?.prompt || "you are a gary from the phone store" },
-                  first_message: "hey there! how can I help you today?",
+                  first_message: "ciao",
                 },
               }
             };

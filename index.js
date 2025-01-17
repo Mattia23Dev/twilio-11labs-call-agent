@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import fastifyFormBody from "@fastify/formbody";
 import fastifyWs from "@fastify/websocket";
 import { registerInboundRoutes } from './inbound-calls.js';
-import { registerOutboundRoutes } from './outbound-calls.js';
+import { registerOutboundRoutes } from './forTheLegends/outbound/outbound-normal.js';
 import fastifyCors from "@fastify/cors";
 
 // Load environment variables from .env file
