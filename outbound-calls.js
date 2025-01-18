@@ -127,11 +127,11 @@ export function registerOutboundRoutes(fastify) {
             //console.log("[ElevenLabs] Sending initial config with prompt:", initialConfig.conversation_config_override.agent.prompt.prompt);
 
             // Send the configuration to ElevenLabs
-            elevenLabsWs.send(JSON.stringify({
+            /*elevenLabsWs.send(JSON.stringify({
               type: "configuration",
               echo_cancellation: true,
               noise_suppression: true,
-            }));
+            }));*/
 
           });
 
