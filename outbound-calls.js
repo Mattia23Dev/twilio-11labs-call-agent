@@ -74,7 +74,7 @@ export function registerOutboundRoutes(fastify) {
   });
 
   // TwiML route for outbound calls
-  fastify.all("/outbound-call-twiml", async (request, reply) => {
+  /*fastify.all("/outbound-call-twiml", async (request, reply) => {
     const prompt = request.query.prompt || 'Fai l\'assistente';
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
@@ -87,7 +87,42 @@ export function registerOutboundRoutes(fastify) {
       </Response>`;
 
       reply.type("text/xml").send(twimlResponse);
+  });*/
+  fastify.all("/outbound-call-twiml", async (request, reply) => {
+    const prompt = request.query.prompt || 'Fai l\'assistente';
+  
+    // TwiML con il rilevamento della segreteria
+    const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+      <Response>
+        <Say>Please wait while we connect you.</Say>
+        <Dial action="/check-voicemail" timeout="20">
+          <Number>${request.query.number}</Number>
+        </Dial>
+      </Response>`;
+  
+    reply.type("text/xml").send(twimlResponse);
   });
+  
+
+  fastify.post("/check-voicemail", async (request, reply) => {
+    const { AnsweredBy } = request.body;
+  
+    if (AnsweredBy === "machine") {
+      console.log("[Twilio] Voicemail detected, ending the call.");
+      return reply.type("text/xml").send('<Response><Hangup/></Response>');
+    }
+  
+    console.log("[Twilio] Call answered by human, initiating Eleven Labs bot.");
+    return reply.type("text/xml").send(`
+      <Response>
+        <Connect>
+          <Stream url="wss://${request.headers.host}/outbound-media-stream">
+            <Parameter name="prompt" value="${request.body.prompt || 'Fai l\'assistente'}" />
+          </Stream>
+        </Connect>
+      </Response>
+    `);
+  });  
 
   // WebSocket route for handling media streams
   fastify.register(async (fastifyInstance) => {
