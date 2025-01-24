@@ -304,7 +304,7 @@ Fornisci dettagli chiari sull’indirizzo e la zona di riferimento.
                 },
               },
               metadata: {
-                phone_number: phoneNumber,
+                phone_number: number,
               }
             };
             
