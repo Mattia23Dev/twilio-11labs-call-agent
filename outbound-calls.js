@@ -56,8 +56,8 @@ export function registerOutboundRoutes(fastify) {
       const call = await twilioClient.calls.create({
         from: TWILIO_PHONE_NUMBER,
         to: number,
-        url: `https://${request.headers.host}/outbound-call-twiml?prompt=${encodeURIComponent(prompt)}`,
-        sendDigits: `nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}`
+        url: `https://${request.headers.host}/outbound-call-twiml?prompt=${encodeURIComponent(prompt)}&nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}`
+        //sendDigits: `nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}`
       });
 
       reply.send({ 
@@ -91,6 +91,9 @@ export function registerOutboundRoutes(fastify) {
   });*/
   fastify.all("/outbound-call-twiml", async (request, reply) => {
     const prompt = request.query.prompt || 'Fai l\'assistente';
+    const nome = request.query.nome; // Recupera il parametro 'nome'
+    const citta = request.query.citta; // Recupera il parametro 'citta'
+    const number = request.query.number; // Recupera il numero di telefono
   
     // TwiML con il rilevamento della segreteria
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
@@ -98,6 +101,9 @@ export function registerOutboundRoutes(fastify) {
         <Say>Please wait while we connect you.</Say>
         <Dial action="/check-voicemail" timeout="20">
           <Number>${request.query.number}</Number>
+          <Parameter name="number" value="${number}" />
+          <Parameter name="nome" value="${nome}" />
+          <Parameter name="citta" value="${citta}" />
         </Dial>
       </Response>`;
   
@@ -140,7 +146,7 @@ export function registerOutboundRoutes(fastify) {
       ws.on('error', console.error);
 
       // Set up ElevenLabs connection
-      const setupElevenLabs = async ({nome, citta}) => {
+      const setupElevenLabs = async ({nome, citta, number}) => {
         try {
           const signedUrl = await getSignedUrl();
           console.log("[ElevenLabs] Signed URL:", signedUrl);
@@ -155,6 +161,7 @@ export function registerOutboundRoutes(fastify) {
               conversation_config_override: {
                 agent: {
                   prompt: { prompt: `
+                    Stai chiamando il numero ${number}
                     Ruolo e obiettivo principale: Sei Lucia, incaricata di gestire le richieste per Dentista-Italia, un servizio che aiuta i pazienti a trovare centri odontoiatrici per impianti dentali. Il tuo obiettivo è qualificare i lead, identificare la città e il centro più vicino, verificare la situazione dentale del paziente, controllare se si tratta di una prima visita e proporre un appuntamento. Devi essere educata, chiara e rassicurante, adattando il tuo tono alle esigenze dell’utente.
 Regole generali:
 Gentilezza e professionalità: Usa sempre un tono amichevole e rassicurante. Parla come farebbe una persona reale.
@@ -413,9 +420,9 @@ Fornisci dettagli chiari sull’indirizzo e la zona di riferimento.
               console.log(`[Twilio] Stream started - StreamSid: ${streamSid}, CallSid: ${callSid}`);
               console.log('[Twilio] Start parameters:', customParameters);
 
-              const { nome, citta } = customParameters;
+              const { nome, citta, number } = customParameters;
               // Passa 'nome' e 'citta' al setup di ElevenLabs
-              setupElevenLabs(nome, citta);
+              setupElevenLabs({ nome, citta, number });
               break;
 
             case "media":
