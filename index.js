@@ -21,7 +21,7 @@ fastify.register(fastifyCors, {
   origin: true // Permette tutte le origini
 });
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 6000;
 
 // Root route for health check
 fastify.get("/", async (_, reply) => {

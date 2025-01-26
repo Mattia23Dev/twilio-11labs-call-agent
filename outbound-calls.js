@@ -56,7 +56,7 @@ export function registerOutboundRoutes(fastify) {
       const call = await twilioClient.calls.create({
         from: TWILIO_PHONE_NUMBER,
         to: number,
-        url: `https://${request.headers.host}/outbound-call-twiml?prompt=${encodeURIComponent(prompt)}&nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}`
+        url: `https://${request.headers.host}/outbound-call-twiml?nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}&number=${encodeURIComponent(number)}`
         //sendDigits: `nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}`
       });
 
@@ -75,21 +75,27 @@ export function registerOutboundRoutes(fastify) {
   });
 
   // TwiML route for outbound calls
-  /*fastify.all("/outbound-call-twiml", async (request, reply) => {
+  fastify.all("/outbound-call-twiml", async (request, reply) => {
     const prompt = request.query.prompt || 'Fai l\'assistente';
+    const nome = request.query.nome; // Recupera il parametro 'nome'
+    const citta = request.query.citta; // Recupera il parametro 'citta'
+    const number = request.query.number; // Recupera il numero di telefono
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
       <Response>
         <Connect>
           <Stream url="wss://${request.headers.host}/outbound-media-stream">
             <Parameter name="prompt" value="${prompt}" />
+            <Parameter name="nome" value="${nome}" />
+            <Parameter name="citta" value="${citta}" />
+            <Parameter name="number" value="${number}" />
           </Stream>
         </Connect>
       </Response>`;
 
       reply.type("text/xml").send(twimlResponse);
-  });*/
-  fastify.all("/outbound-call-twiml", async (request, reply) => {
+  });
+  /*fastify.all("/outbound-call-twiml", async (request, reply) => {
     const prompt = request.query.prompt || 'Fai l\'assistente';
     const nome = request.query.nome; // Recupera il parametro 'nome'
     const citta = request.query.citta; // Recupera il parametro 'citta'
@@ -99,7 +105,7 @@ export function registerOutboundRoutes(fastify) {
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
       <Response>
         <Say>Please wait while we connect you.</Say>
-        <Dial action="/check-voicemail" timeout="20">
+        <Dial action="/check-voicemail?" timeout="20">
           <Number>${request.query.number}</Number>
           <Parameter name="number" value="${number}" />
           <Parameter name="nome" value="${nome}" />
@@ -108,7 +114,7 @@ export function registerOutboundRoutes(fastify) {
       </Response>`;
   
     reply.type("text/xml").send(twimlResponse);
-  });
+  });*/
   
 
   fastify.post("/check-voicemail", async (request, reply) => {
@@ -150,6 +156,7 @@ export function registerOutboundRoutes(fastify) {
         try {
           const signedUrl = await getSignedUrl();
           console.log("[ElevenLabs] Signed URL:", signedUrl);
+          console.log("[ElevenLabs] Info", nome, citta, number);
           elevenLabsWs = new WebSocket(signedUrl);
 
           elevenLabsWs.on("open", () => {
@@ -303,9 +310,12 @@ Fornisci dettagli chiari sull’indirizzo e la zona di riferimento.
                   first_message: `Pronto ${nome}?`,
                 },
               },
-              metadata: {
-                phone_number: number,
-              }
+              /*dynamicVariables: {
+                Numero_Telefono: "+393313869850"
+              }*/
+              /*metadata: {
+                Numero_Telefono: number,
+              }*/
             };
             
             /*overrides: {
@@ -321,10 +331,15 @@ Fornisci dettagli chiari sull’indirizzo e la zona di riferimento.
 
             // Send the configuration to ElevenLabs
             /*elevenLabsWs.send(JSON.stringify({
-              type: "configuration",
-              echo_cancellation: true,
-              noise_suppression: true,
+              type: "conversation_initiation_client_data",
+              //echo_cancellation: true,
+              //noise_suppression: true,
+              overrides: initialConfig,
+              dynamicVariables: {
+                Numero_Telefono: number
+              }
             }));*/
+            elevenLabsWs.send(JSON.stringify(initialConfig));
 
           });
 
@@ -335,6 +350,10 @@ Fornisci dettagli chiari sull’indirizzo e la zona di riferimento.
               switch (message.type) {
                 case "conversation_initiation_metadata":
                   console.log("[ElevenLabs] Received initiation metadata");
+                  break;
+
+                case "conversation_initiation_client_data":
+                  console.log("[ElevenLabs] Received client data");
                   break;
 
                 case "audio":
