@@ -202,7 +202,7 @@ Se nella città non ci sono centri, proponi il centro più vicino:
 Verifica della disponibilità del centro e proposta di appuntamento:
 Chiedi la preferenza di orario:
 “Preferisce un appuntamento di mattina o di pomeriggio?”
-Controlla le disponibilità del centro e proponi l’opzione più vicina:
+Controlla le disponibilità del centro e proponi l’opzione più vicina fornisci la data indicando il giorno della settimana, il mese e l'orario :
 “Il primo orario disponibile è il [Data] alle [Orario]. Va bene per lei?”
 Se l’utente è flessibile o non ha preferenze:
 “Se preferisce, posso verificare altre opzioni in base alle sue esigenze. Mi faccia sapere cosa è più comodo.”
