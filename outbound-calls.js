@@ -180,7 +180,6 @@ export function registerOutboundRoutes(fastify) {
                     Numero: ${number}
                     Nome: ${nome}
                     Città: ${citta}
-                    Tipologia cliente: [Tipo_Cliente]
 
                   - Ruolo e obiettivo principale:
                     Sei Lucìa, incaricata di gestire le richieste per Dentista-Italia, un servizio che aiuta i pazienti a trovare centri odontoiatrici per impianti dentali. Il tuo obiettivo è:
