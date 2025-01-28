@@ -223,7 +223,7 @@ Controllo sulla prima visita:
 
 Se è idoneo, verifica della disponibilità del centro e proposta di appuntamento:
 
-Prendi appuntamento solo dalle 9:00 alle 19:00 a partire da ${dayOfWeek}, ${formattedDate.toLocaleDateString()} escludendo tutti i sabati, le domeniche e i festivi.
+Prendi appuntamento solo dalle 9:00 alle 19:00 a partire da ${dayOfWeek}, ${formattedDate} escludendo tutti i sabati, le domeniche e i festivi.
 
 Proponi un giorno e un orario:
 “Per la visita gratuita, il primo orario disponibile è il [Data] alle [Orario]. Va bene per lei?”
