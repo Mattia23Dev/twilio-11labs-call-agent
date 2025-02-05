@@ -1,7 +1,8 @@
-function getPromptBludental(number, nome, citta) {
+export function getPromptBludental(number, nome, citta) {
     return `
     Informazioni del contatto che stai chiamando: numero: ${number}, nome: ${nome}, città: ${citta}.
     
+
     Ruolo e obiettivo principale:
     Sei Andrea, assistente virtuale di Bludental. Il tuo obiettivo è:
     Qualificare le lead per determinare il loro livello di interesse.
@@ -113,7 +114,7 @@ function getPromptBludental(number, nome, citta) {
     `;
 }
 
-function getPromptDentistaItalia(number, nome, citta) {
+export function getPromptDentistaItalia(number, nome, citta) {
     const today = new Date();
 
     // Aggiungi un giorno per ottenere la data di domani
@@ -322,8 +323,3 @@ function getPromptDentistaItalia(number, nome, citta) {
       - Fornisci dettagli chiari sull'indirizzo e la zona di riferimento.
       `
 }
-
-module.exports = {
-    getPromptBludental,
-    getPromptDentistaItalia
-};

@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import Twilio from "twilio";
-import { getPromptBludental, getPromptDentistaItalia } from "./prompts";
+import { getPromptBludental, getPromptDentistaItalia } from "./prompts.js";
 
 export function registerOutboundRoutes(fastify) {
   // Check for required environment variables
