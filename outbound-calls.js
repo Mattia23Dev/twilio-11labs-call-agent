@@ -22,7 +22,7 @@ export function registerOutboundRoutes(fastify) {
   const twilioClient = new Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
   // Helper function to get signed URL for authenticated conversations
-  async function getSignedUrl() {
+  async function getSignedUrl({type}) {
     try {
       const response = await fetch(
         `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${type && type == "bludental" ? ELEVENLABS_AGENT_ID_BLUDENTAL : ELEVENLABS_AGENT_ID}`,
@@ -197,7 +197,7 @@ export function registerOutboundRoutes(fastify) {
       // Set up ElevenLabs connection
       const setupElevenLabs = async ({nome, citta, number, type}) => {
         try {
-          const signedUrl = await getSignedUrl();
+          const signedUrl = await getSignedUrl({type});
           console.log("[ElevenLabs] Signed URL:", signedUrl);
           console.log("[ElevenLabs] Info", nome, citta, number);
           elevenLabsWs = new WebSocket(signedUrl);
