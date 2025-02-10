@@ -124,7 +124,7 @@ export function getPromptDentistaItalia(number, nome, citta) {
 
     // Aggiungi un giorno per ottenere la data di domani
     const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    tomorrow.setDate(today.getDate() + 7);
 
     const options = { weekday: 'long', day: 'numeric', month: 'long' };
     const formattedDate = tomorrow.toLocaleDateString('it-IT', options);
@@ -141,7 +141,7 @@ export function getPromptDentistaItalia(number, nome, citta) {
     
         // Aggiungi giorni finché non è un giorno feriale (lunedì-venerdì)
         do {
-          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setDate(tomorrow.getDate() + 7);
         } while (tomorrow.getDay() === 0 || tomorrow.getDay() === 6); // 0 è domenica, 6 è sabato
     
         const options = { weekday: 'long', day: 'numeric', month: 'long' };

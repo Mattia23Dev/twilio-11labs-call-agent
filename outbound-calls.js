@@ -223,7 +223,7 @@ export function registerOutboundRoutes(fastify) {
                   prompt: { prompt: ` 
                     ${type && type == "bludental" ? getPromptBludental(number, nome, citta) : getPromptDentistaItalia(number, nome, citta)}
                     ` },
-                  first_message: `Parlo con ${nome}?`,
+                  first_message: `Si Pronto?, ehm parlo con ${nome}?`,
                 },
               },
               /*dynamicVariables: {
