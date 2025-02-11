@@ -180,6 +180,9 @@ export function registerOutboundRoutes(fastify) {
     `);
   });  
 
+  // Mappa per tenere traccia delle connessioni WebSocket attive
+  const activeConnections = new Map();
+
   // WebSocket route for handling media streams
   fastify.register(async (fastifyInstance) => {
     fastifyInstance.get("/outbound-media-stream", { websocket: true }, (ws, req) => {
@@ -384,13 +387,36 @@ export function registerOutboundRoutes(fastify) {
         }
       });
 
+      // Aggiungi la connessione attiva alla mappa
+      activeConnections.set(callSid, ws);
+
       // Handle WebSocket closure
       ws.on("close", () => {
         console.log("[Twilio] Client disconnected");
+        activeConnections.delete(callSid); // Rimuovi la connessione dalla mappa
         if (elevenLabsWs?.readyState === WebSocket.OPEN) {
           elevenLabsWs.close();
         }
       });
     });
+  });
+
+  // Nuovo endpoint per chiudere la chiamata
+  fastify.post("/end-call", async (request, reply) => {
+    const { callSid } = request.body;
+
+    if (!callSid) {
+      return reply.code(400).send({ error: "CallSid is required" });
+    }
+
+    const ws = activeConnections.get(callSid);
+
+    if (ws) {
+      ws.close();
+      activeConnections.delete(callSid);
+      return reply.send({ success: true, message: "Call ended" });
+    } else {
+      return reply.code(404).send({ error: "Call not found" });
+    }
   });
 }
