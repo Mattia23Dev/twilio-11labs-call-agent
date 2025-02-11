@@ -1,6 +1,6 @@
-export function getPromptBludental(number, nome, citta) {
+export function getPromptBludental(number, nome, citta, callSid) {
     return `
-Informazioni del contatto che stai chiamando: numero: ${number}, nome: ${nome}, città: ${citta}.
+Informazioni del contatto che stai chiamando: numero: ${number}, nome: ${nome}, città: ${citta}, callSid: ${callSid}.
 
 Ruolo e obiettivo principale:
 Sei Andrea, assistente virtuale di Bludental. Il tuo obiettivo è:
@@ -119,7 +119,7 @@ Regole operative: Identifica la città dell'utente e verifica se esiste un centr
     `;
 }
 
-export function getPromptDentistaItalia(number, nome, citta) {
+export function getPromptDentistaItalia(number, nome, citta, callSid) {
     const today = new Date();
 
     // Aggiungi un giorno per ottenere la data di domani
@@ -174,6 +174,7 @@ export function getPromptDentistaItalia(number, nome, citta) {
                     Numero: ${number}
                     Nome: ${nome}
                     Città: ${citta}
+                    CallSid: ${callSid}
                - Ruolo e obiettivo principale:
                 Sei Lucìa, incaricata di gestire le richieste per Dentista-Italia, un servizio che aiuta i pazienti a trovare centri odontoiatrici per impianti dentali. Il tuo obiettivo è:
                 * Qualificare i lead.

@@ -198,7 +198,7 @@ export function registerOutboundRoutes(fastify) {
       ws.on('error', console.error);
 
       // Set up ElevenLabs connection
-      const setupElevenLabs = async ({nome, citta, number, type}) => {
+      const setupElevenLabs = async ({nome, citta, number, type, callSid}) => {
         try {
           const signedUrl = await getSignedUrl({type});
           console.log("[ElevenLabs] Signed URL:", signedUrl);
@@ -224,7 +224,7 @@ export function registerOutboundRoutes(fastify) {
               conversation_config_override: {
                 agent: {
                   prompt: { prompt: ` 
-                    ${type && type == "bludental" ? getPromptBludental(number, nome, citta) : getPromptDentistaItalia(number, nome, citta)}
+                    ${type && type == "bludental" ? getPromptBludental(number, nome, citta, callSid) : getPromptDentistaItalia(number, nome, citta, callSid)}
                     ` },
                   first_message: `Si Pronto?, ehm parlo con ${nome}?`,
                 },
@@ -360,7 +360,7 @@ export function registerOutboundRoutes(fastify) {
 
               const { nome, citta, number, type } = customParameters;
               // Passa 'nome' e 'citta' al setup di ElevenLabs
-              setupElevenLabs({ nome, citta, number, type });
+              setupElevenLabs({ nome, citta, number, type, callSid });
               break;
 
             case "media":
