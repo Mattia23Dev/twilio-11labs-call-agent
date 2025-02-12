@@ -201,7 +201,7 @@ export function registerOutboundRoutes(fastify) {
       const setupElevenLabs = async ({nome, citta, number, type, callSid}) => {
         try {
           const signedUrl = await getSignedUrl({type});
-          console.log("[ElevenLabs] Signed URL:", signedUrl);
+          console.log("[ElevenLabs] CallSid:", callSid);
           console.log("[ElevenLabs] Info", nome, citta, number);
           elevenLabsWs = new WebSocket(signedUrl);
           const today = new Date();
@@ -318,6 +318,32 @@ export function registerOutboundRoutes(fastify) {
                     }));
                   }
                   break;
+                
+                case "user_transcript":
+                    console.log("[ElevenLabs] User transcript received:", message);
+                    if (message?.user_transcription_event?.user_transcript?.includes("segnale acustico")) {
+                      console.log("[ElevenLabs] User transcript Dobbiamo chiudere la chiamata:", message);
+                      console.log(`[Twilio] Attempting to retrieve connection with CallSid: ${callSid}`);
+                      const ws = activeConnections.get(callSid);
+                      if (ws) {
+                        ws.close();
+                        activeConnections.delete(callSid);
+                        console.log("[Twilio] Call ended due to specific transcript");
+                        
+                        // Chiudi il WebSocket di ElevenLabs se è aperto
+                        if (elevenLabsWs?.readyState === WebSocket.OPEN) {
+                          elevenLabsWs.close();
+                          console.log("[ElevenLabs] WebSocket closed due to specific transcript");
+                        }
+                      } else {
+                        console.log("[Twilio] Call not found for CallSid:", callSid);
+                      }
+                    }
+                    break;
+            
+                case "agent_response":
+                    console.log("[ElevenLabs] Agent response received:", message);
+                    break;
 
                 default:
                   console.log(`[ElevenLabs] Unhandled message type: ${message.type}`);
@@ -348,7 +374,7 @@ export function registerOutboundRoutes(fastify) {
       ws.on("message", (message) => {
         try {
           const msg = JSON.parse(message);
-          console.log(`[Twilio] Received event: ${msg.event}`);
+          //console.log(`[Twilio] Received event: ${msg.event}`);
 
           switch (msg.event) {
             case "start":
@@ -358,7 +384,13 @@ export function registerOutboundRoutes(fastify) {
               console.log(`[Twilio] Stream started - StreamSid: ${streamSid}, CallSid: ${callSid}`);
               console.log('[Twilio] Start parameters:', customParameters);
 
+              // Aggiungi la connessione attiva alla mappa prima di chiamare setupElevenLabs
+              console.log(`[Twilio] Adding connection to activeConnections with CallSid: ${callSid}`);
+              activeConnections.set(callSid, ws);
+              console.log("activeConnections", activeConnections);
+
               const { nome, citta, number, type } = customParameters;
+              console.log("callSid", callSid);
               // Passa 'nome' e 'citta' al setup di ElevenLabs
               setupElevenLabs({ nome, citta, number, type, callSid });
               break;
@@ -371,7 +403,7 @@ export function registerOutboundRoutes(fastify) {
                 elevenLabsWs.send(JSON.stringify(audioMessage));
               }
               break;
-
+            
             case "stop":
               console.log(`[Twilio] Stream ${streamSid} ended`);
               if (elevenLabsWs?.readyState === WebSocket.OPEN) {
@@ -380,15 +412,12 @@ export function registerOutboundRoutes(fastify) {
               break;
 
             default:
-              console.log(`[Twilio] Unhandled event: ${msg.event}`);
+              console.log(`[Twilio] Unhandled event: ${msg}`);
           }
         } catch (error) {
           console.error("[Twilio] Error processing message:", error);
         }
       });
-
-      // Aggiungi la connessione attiva alla mappa
-      activeConnections.set(callSid, ws);
 
       // Handle WebSocket closure
       ws.on("close", () => {
@@ -404,7 +433,7 @@ export function registerOutboundRoutes(fastify) {
   // Nuovo endpoint per chiudere la chiamata
   fastify.post("/end-call", async (request, reply) => {
     const { callSid } = request.body;
-
+    console.log("[Twilio] Ending call with CallSid:", callSid);
     if (!callSid) {
       return reply.code(400).send({ error: "CallSid is required" });
     }
@@ -414,6 +443,7 @@ export function registerOutboundRoutes(fastify) {
     if (ws) {
       ws.close();
       activeConnections.delete(callSid);
+      console.log("[Twilio] Call ended");
       return reply.send({ success: true, message: "Call ended" });
     } else {
       return reply.code(404).send({ error: "Call not found" });
