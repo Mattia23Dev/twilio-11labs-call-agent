@@ -1,6 +1,6 @@
-const axios = require('axios');
+import axios from 'axios';
 
-async function inviaDatiErroreChiamata(numeroTelefono, motivoErrore, type) {
+export async function inviaDatiErroreChiamata(numeroTelefono, motivoErrore, type) {
   try {
     const response = await axios.post(type && type == "bluedental" ? 'https://leadsystembluedental-production.up.railway.app/api/webhook-elevenlabs-sql-errore-chiamata' : 'https://leadsystembluedental-production.up.railway.app/api/webhook-elevenlabs-errore-chiamata', {
       Numero_Telefono: numeroTelefono,
@@ -11,7 +11,3 @@ async function inviaDatiErroreChiamata(numeroTelefono, motivoErrore, type) {
     console.error('Errore durante l\'invio dei dati:', error);
   }
 }
-
-module.exports = {
-  inviaDatiErroreChiamata
-};
