@@ -1,6 +1,7 @@
 import WebSocket from "ws";
 import Twilio from "twilio";
 import { getPromptBludental, getPromptDentistaItalia } from "./prompts.js";
+import { inviaDatiErroreChiamata } from "./utils/LeadSystemFunctions.js";
 
 export function registerOutboundRoutes(fastify) {
   // Check for required environment variables
@@ -229,35 +230,8 @@ export function registerOutboundRoutes(fastify) {
                   first_message: `Si Pronto?, ehm parlo con ${nome}?`,
                 },
               },
-              /*dynamicVariables: {
-                Numero_Telefono: "+393313869850"
-              }*/
-              /*metadata: {
-                Numero_Telefono: number,
-              }*/
             };
             
-            /*overrides: {
-              agent: {
-                prompt: {
-                    prompt: `The customer's bank account balance is ${customer_balance}. They are based in ${customer_location}.`
-                },
-                firstMessage: `Hi ${customer_name}, how can I help you today?`,
-              },
-            },*/
-
-            //console.log("[ElevenLabs] Sending initial config with prompt:", initialConfig.conversation_config_override.agent.prompt.prompt);
-
-            // Send the configuration to ElevenLabs
-            /*elevenLabsWs.send(JSON.stringify({
-              type: "conversation_initiation_client_data",
-              //echo_cancellation: true,
-              //noise_suppression: true,
-              overrides: initialConfig,
-              dynamicVariables: {
-                Numero_Telefono: number
-              }
-            }));*/
             elevenLabsWs.send(JSON.stringify(initialConfig));
 
           });
@@ -335,6 +309,9 @@ export function registerOutboundRoutes(fastify) {
                           elevenLabsWs.close();
                           console.log("[ElevenLabs] WebSocket closed due to specific transcript");
                         }
+
+                        // Invia i dati all'endpoint
+                        inviaDatiErroreChiamata(number, "Segreteria", type);
                       } else {
                         console.log("[Twilio] Call not found for CallSid:", callSid);
                       }
