@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import Twilio from "twilio";
 import { getPromptBludental, getPromptDentistaItalia } from "./prompts.js";
-import { inviaDatiErroreChiamata } from "./utils/LeadSystemFunctions.js";
+import { analizzaTrascrizione, inviaDatiErroreChiamata } from "./utils/LeadSystemFunctions.js";
 
 export function registerOutboundRoutes(fastify) {
   // Check for required environment variables
@@ -88,7 +88,7 @@ export function registerOutboundRoutes(fastify) {
   }
   // Route to initiate outbound calls
   fastify.post("/outbound-call", async (request, reply) => {
-    const { number, prompt, nome, citta, type } = request.body;
+    const { number, prompt, nome, citta, type, transcript } = request.body;
 
     if (!number) {
       return reply.code(400).send({ error: "Phone number is required" });
@@ -98,7 +98,7 @@ export function registerOutboundRoutes(fastify) {
       const call = await twilioClient.calls.create({
         from: TWILIO_PHONE_NUMBER,
         to: number,
-        url: `https://${request.headers.host}/outbound-call-twiml?nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}&number=${encodeURIComponent(number)}&type=${type}`
+        url: `https://${request.headers.host}/outbound-call-twiml?nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}&number=${encodeURIComponent(number)}&type=${type}&transcript=${encodeURIComponent(transcript)}`
         //sendDigits: `nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}`
       });
 
@@ -123,6 +123,7 @@ export function registerOutboundRoutes(fastify) {
     const citta = request.query.citta; // Recupera il parametro 'citta'
     const number = request.query.number; // Recupera il numero di telefono
     const type = request.query.type; // Recupera il tipo di chiamata
+    const transcript = request.query.transcript; // Recupera il trascrizione
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
       <Response>
@@ -133,6 +134,7 @@ export function registerOutboundRoutes(fastify) {
             <Parameter name="citta" value="${citta}" />
             <Parameter name="number" value="${number}" />
             <Parameter name="type" value="${type}" />
+            <Parameter name="transcript" value="${transcript}" />
           </Stream>
         </Connect>
       </Response>`;
@@ -179,7 +181,7 @@ export function registerOutboundRoutes(fastify) {
         </Connect>
       </Response>
     `);
-  });  
+  });
 
   // Mappa per tenere traccia delle connessioni WebSocket attive
   const activeConnections = new Map();
@@ -199,14 +201,14 @@ export function registerOutboundRoutes(fastify) {
       ws.on('error', console.error);
 
       // Set up ElevenLabs connection
-      const setupElevenLabs = async ({nome, citta, number, type, callSid}) => {
+      const setupElevenLabs = async ({nome, citta, number, type, callSid, transcript}) => {
         try {
           const signedUrl = await getSignedUrl({type});
           console.log("[ElevenLabs] CallSid:", callSid);
-          console.log("[ElevenLabs] Info", nome, citta, number);
+          console.log("[ElevenLabs] Info", nome, citta, number, transcript);
           elevenLabsWs = new WebSocket(signedUrl);
           const today = new Date();
-
+          let motivoErrore = "Errore Chiamata";
           // Aggiungi un giorno per ottenere la data di domani
           const tomorrow = new Date(today);
           tomorrow.setDate(today.getDate() + 1);
@@ -225,7 +227,7 @@ export function registerOutboundRoutes(fastify) {
               conversation_config_override: {
                 agent: {
                   prompt: { prompt: ` 
-                    ${type && type == "bludental" ? getPromptBludental(number, nome, citta, callSid) : getPromptDentistaItalia(number, nome, citta, callSid)}
+                    ${type && type == "bludental" ? getPromptBludental(number, nome, citta, callSid, transcript) : getPromptDentistaItalia(number, nome, citta, callSid, transcript)}
                     ` },
                   first_message: `Si Pronto?, ehm parlo con ${nome}?`,
                 },
@@ -293,8 +295,15 @@ export function registerOutboundRoutes(fastify) {
                   }
                   break;
                 
-                case "user_transcript":
+                  case "user_transcript":
                     console.log("[ElevenLabs] User transcript received:", message);
+                    const userTranscript = message?.user_transcription_event?.user_transcript;
+                    if (userTranscript) {
+                      const connection = activeConnections.get(callSid);
+                      if (connection) {
+                        connection.transcript.push(`Utente: ${userTranscript}`);
+                      }
+                    }
                     if (message?.user_transcription_event?.user_transcript?.includes("segnale acustico")) {
                       console.log("[ElevenLabs] User transcript Dobbiamo chiudere la chiamata:", message);
                       console.log(`[Twilio] Attempting to retrieve connection with CallSid: ${callSid}`);
@@ -309,18 +318,26 @@ export function registerOutboundRoutes(fastify) {
                           elevenLabsWs.close();
                           console.log("[ElevenLabs] WebSocket closed due to specific transcript");
                         }
-
+      
                         // Invia i dati all'endpoint
-                        inviaDatiErroreChiamata(number, "Segreteria", type);
+                        motivoErrore = "Segreteria";
+                        //inviaDatiErroreChiamata(number, "Segreteria", type);
                       } else {
                         console.log("[Twilio] Call not found for CallSid:", callSid);
                       }
                     }
                     break;
-            
-                case "agent_response":
+      
+                  case "agent_response":
                     console.log("[ElevenLabs] Agent response received:", message);
-                    break;
+                    const agentResponse = message?.agent_response_event?.agent_response;
+                    if (agentResponse) {
+                      const connection = activeConnections.get(callSid);
+                      if (connection) {
+                        connection.transcript.push(`Agente: ${agentResponse}`);
+                      }
+                    }
+                    break;      
 
                 default:
                   console.log(`[ElevenLabs] Unhandled message type: ${message.type}`);
@@ -334,9 +351,21 @@ export function registerOutboundRoutes(fastify) {
             console.error("[ElevenLabs] WebSocket error:", error);
           });
 
-          elevenLabsWs.on("close", (code, reason) => {
+          elevenLabsWs.on("close", async (code, reason) => {
             console.log("[ElevenLabs] Disconnected");
             console.log(`Close code: ${code}, Reason: ${reason}`);
+            const connection = activeConnections.get(callSid);
+            if (connection) {
+              console.log("Trascrizione:", connection.transcript);
+              const analisi = await analizzaTrascrizione(connection.transcript.join(' '));
+              console.log("Risultato analisi OpenAI:", analisi);
+              if (analisi === "SI") {
+                console.log("Chiamata conclusa in maniera naturale");
+              } else {
+                console.log("Chiamata interrotta prima della fine");
+                inviaDatiErroreChiamata(number, motivoErrore, type, connection.transcript.join(' '));
+              }
+            }
           });
 
         } catch (error) {
@@ -361,15 +390,19 @@ export function registerOutboundRoutes(fastify) {
               console.log(`[Twilio] Stream started - StreamSid: ${streamSid}, CallSid: ${callSid}`);
               console.log('[Twilio] Start parameters:', customParameters);
 
-              // Aggiungi la connessione attiva alla mappa prima di chiamare setupElevenLabs
-              console.log(`[Twilio] Adding connection to activeConnections with CallSid: ${callSid}`);
-              activeConnections.set(callSid, ws);
-              console.log("activeConnections", activeConnections);
-
-              const { nome, citta, number, type } = customParameters;
+              const { nome, citta, number, type, transcript } = customParameters;
               console.log("callSid", callSid);
+
+              // Aggiungi la connessione attiva alla mappa con numero e trascrizioni
+              console.log(`[Twilio] Adding connection to activeConnections with CallSid: ${callSid}`);
+              activeConnections.set(callSid, {
+                ws,
+                number,
+                transcript: []  // Inizializza l'array di trascrizioni
+              });
+
               // Passa 'nome' e 'citta' al setup di ElevenLabs
-              setupElevenLabs({ nome, citta, number, type, callSid });
+              setupElevenLabs({ nome, citta, number, type, callSid, transcript });
               break;
 
             case "media":

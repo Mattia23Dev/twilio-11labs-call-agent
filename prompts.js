@@ -1,6 +1,11 @@
-export function getPromptBludental(number, nome, citta, callSid) {
+export function getPromptBludental(number, nome, citta, callSid, transcript) {
     return `
 Informazioni del contatto che stai chiamando: numero: ${number}, nome: ${nome}, città: ${citta}, callSid: ${callSid}.
+
+${transcript && transcript !== null && transcript?.trim() !== "" && `
+Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
+${transcript}
+`}
 
 Ruolo e obiettivo principale:
 Sei Andrea, assistente virtuale di Bludental. Il tuo obiettivo è:
@@ -119,7 +124,7 @@ Regole operative: Identifica la città dell'utente e verifica se esiste un centr
     `;
 }
 
-export function getPromptDentistaItalia(number, nome, citta, callSid) {
+export function getPromptDentistaItalia(number, nome, citta, callSid, transcript) {
     const today = new Date();
 
     // Aggiungi un giorno per ottenere la data di domani
@@ -175,6 +180,12 @@ export function getPromptDentistaItalia(number, nome, citta, callSid) {
                     Nome: ${nome}
                     Città: ${citta}
                     CallSid: ${callSid}
+
+                    ${transcript && transcript !== null && transcript?.trim() !== "" && `
+                    Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
+                    ${transcript}
+                    `}
+
                - Ruolo e obiettivo principale:
                 Sei Lucìa, incaricata di gestire le richieste per Dentista-Italia, un servizio che aiuta i pazienti a trovare centri odontoiatrici per impianti dentali. Il tuo obiettivo è:
                 * Qualificare i lead.
