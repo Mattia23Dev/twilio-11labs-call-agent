@@ -98,7 +98,7 @@ export function registerOutboundRoutes(fastify) {
       const call = await twilioClient.calls.create({
         from: TWILIO_PHONE_NUMBER,
         to: number,
-        url: `https://${request.headers.host}/outbound-call-twiml?nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}&number=${encodeURIComponent(number)}&type=${type}&transcript=${encodeURIComponent(transcript)}`
+        url: transcript && transcript !== null && transcript?.trim() !== "" ? `https://${request.headers.host}/outbound-call-twiml?nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}&number=${encodeURIComponent(number)}&type=${type}&transcript=${encodeURIComponent(transcript)}` : `https://${request.headers.host}/outbound-call-twiml?nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}&number=${encodeURIComponent(number)}&type=${type}`
         //sendDigits: `nome=${encodeURIComponent(nome)}&citta=${encodeURIComponent(citta)}`
       });
 
