@@ -1,11 +1,6 @@
 export function getPromptBludental(number, nome, citta, callSid, transcript) {
-    return `
+  let prompt = `
 Informazioni del contatto che stai chiamando: numero: ${number}, nome: ${nome}, città: ${citta}, callSid: ${callSid}.
-
-${transcript && transcript !== null && transcript?.trim() !== "" && `
-Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
-${transcript}
-`}
 
 Ruolo e obiettivo principale:
 Sei Andrea, assistente virtuale di Bludental. Il tuo obiettivo è:
@@ -122,6 +117,14 @@ Elenco centri Bludental: Hai a disposizione i seguenti centri, organizzati per c
 
 Regole operative: Identifica la città dell'utente e verifica se esiste un centro Bludental in quella città. Se non c'è un centro nella città dell'utente, individua quello più vicino. Fornisci dettagli chiari sull'indirizzo e la zona di riferimento.
     `;
+
+  if (transcript && transcript !== null && transcript?.trim() !== "") {
+    prompt += `
+    Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
+    ${transcript}
+    `;
+  }
+  return prompt;
 }
 
 export function getPromptDentistaItalia(number, nome, citta, callSid, transcript) {
@@ -174,17 +177,12 @@ export function getPromptDentistaItalia(number, nome, citta, callSid, transcript
         const parti = nomeCompleto.split(" ");
         return parti[0];
       }
-    return `
+      let prompt = `
                   - Informazioni del contatto chiamato:
                     Numero: ${number}
                     Nome: ${nome}
                     Città: ${citta}
                     CallSid: ${callSid}
-
-                    ${transcript && transcript !== null && transcript?.trim() !== "" && `
-                    Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
-                    ${transcript}
-                    `}
 
                - Ruolo e obiettivo principale:
                 Sei Lucìa, incaricata di gestire le richieste per Dentista-Italia, un servizio che aiuta i pazienti a trovare centri odontoiatrici per impianti dentali. Il tuo obiettivo è:
@@ -335,4 +333,11 @@ export function getPromptDentistaItalia(number, nome, citta, callSid, transcript
                       - Quando proponi il centro, devi specificare solo la via (es. " Roma Prati Fiscali: Via Val Maggia, 60-68; provincia: RM Roma Nord" devi dire solo "Via Val Maggia, 60-68"
                       - Fornisci dettagli chiari sull'indirizzo e la zona di riferimento.
       `
+      if (transcript && transcript !== null && transcript?.trim() !== "") {
+        prompt += `
+        Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
+        ${transcript}
+        `;
+      }
+      return prompt;
 }
