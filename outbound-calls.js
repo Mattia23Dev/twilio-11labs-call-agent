@@ -309,7 +309,7 @@ export function registerOutboundRoutes(fastify) {
                       console.log(`[Twilio] Attempting to retrieve connection with CallSid: ${callSid}`);
                       const ws = activeConnections.get(callSid);
                       if (ws) {
-                        ws.close();
+                        ws.ws.close();
                         activeConnections.delete(callSid);
                         console.log("[Twilio] Call ended due to specific transcript");
                         
