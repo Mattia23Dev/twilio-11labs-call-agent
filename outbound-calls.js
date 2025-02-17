@@ -321,7 +321,7 @@ export function registerOutboundRoutes(fastify) {
       
                         // Invia i dati all'endpoint
                         motivoErrore = "Segreteria";
-                        //inviaDatiErroreChiamata(number, "Segreteria", type);
+                        inviaDatiErroreChiamata(number, motivoErrore, type);
                       } else {
                         console.log("[Twilio] Call not found for CallSid:", callSid);
                       }
