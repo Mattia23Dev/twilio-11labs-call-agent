@@ -23,6 +23,7 @@ export async function analizzaTrascrizione(transcript) {
         { role: 'system', content: `
           Analizza la seguente trascrizione e valuta se la conversazione si è conclusa in maniera naturale o se si è interrotta prima della fine.
           Rispondi solo con "SI" o "NO", non aggiungere altro. Rispondi con la parola "SI" se la conversazione si è conclusa in maniera naturale, altrimenti rispondi con la parola "NO".
+          Se l'ultimo messaggio è inviato dall'utente e non dall'agente, rispondi con la parola "SI".
           ` 
         },
         { role: 'user', content: transcript }
