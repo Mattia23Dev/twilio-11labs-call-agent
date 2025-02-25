@@ -83,11 +83,11 @@ Elenco centri Bludental: Hai a disposizione i seguenti centri, organizzati per c
                         Ostia: Via delle Baleari, 280/296; provincia: RM
                         Padova: Via Niccolò Tommaseo, 2; provincia: PD
                         Parma: Strada Aurelio Saffi, 80; provincia: PR
-                        Perugia: Via della Pescara 39-49; provincia: PG
+                        Perugia: Via della Pescara 39-49; provincia: PGß
                         Piacenza: Viale dei Mille n. 3; provincia: PC
                         Pioltello: Via Roma, 92; provincia: MI
                         Pomezia: Via Roma, 167-169-171; provincia: RM
-                        Pordenone: Viale Treviso 3; provincia:
+                        Pordenone: Viale Treviso 3; provincia:S
                         Prato: Via Zarini 298/d- 298/f; provincia: PO
                         Ravenna: Circonvallazione alla Rotonda dei Goti n. 24; provincia:  RA
                         Reggio Emilia: Viale Piave, 4; provincia: RE
