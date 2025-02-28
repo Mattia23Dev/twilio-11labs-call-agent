@@ -118,12 +118,12 @@ Elenco centri Bludental: Hai a disposizione i seguenti centri, organizzati per c
 Regole operative: Identifica la città dell'utente e verifica se esiste un centro Bludental in quella città. Se non c'è un centro nella città dell'utente, individua quello più vicino. Fornisci dettagli chiari sull'indirizzo e la zona di riferimento.
     `;
 
-  if (transcript && transcript !== null && transcript?.trim() !== "") {
+ /* if (transcript && transcript !== null && transcript?.trim() !== "") {
     prompt += `
     Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
     ${transcript}
     `;
-  }
+  } */
   return prompt;
 }
 
@@ -333,11 +333,11 @@ export function getPromptDentistaItalia(number, nome, citta, callSid, transcript
                       - Quando proponi il centro, devi specificare solo la via (es. " Roma Prati Fiscali: Via Val Maggia, 60-68; provincia: RM Roma Nord" devi dire solo "Via Val Maggia, 60-68"
                       - Fornisci dettagli chiari sull'indirizzo e la zona di riferimento.
       `
-      if (transcript && transcript !== null && transcript?.trim() !== "") {
+     /* if (transcript && transcript !== null && transcript?.trim() !== "") {
         prompt += `
         Qui trovi la trascrizione della conversazione precedentemente effettuata e interrotta, riprendi la conversazione da dove l'aveva interrotta, spiegando all'utente che è caduta la linea:
         ${transcript}
         `;
-      }
+      } */
       return prompt;
 }
