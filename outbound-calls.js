@@ -225,14 +225,14 @@ export function registerOutboundRoutes(fastify) {
             // Send initial configuration with prompt and first message
             const initialConfig = {
               type: "conversation_initiation_client_data",
-              conversation_config_override: {
+              conversation_config_override: type !== "lara" ? {
                 agent: {
                   prompt: { prompt: ` 
                     ${type && type == "bludental" ? getPromptBludental(number, nome, citta, callSid, transcript) : getPromptDentistaItalia(number, nome, citta, callSid, transcript)}
                     ` },
                   first_message: `Si Pronto?, ehm parlo con ${nome}?`,
                 },
-              },
+              } : undefined,
             };
             
             elevenLabsWs.send(JSON.stringify(initialConfig));
