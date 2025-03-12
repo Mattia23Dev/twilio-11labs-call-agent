@@ -356,7 +356,7 @@ export function registerOutboundRoutes(fastify) {
             console.log("[ElevenLabs] Disconnected");
             console.log(`Close code: ${code}, Reason: ${reason}`);
             const connection = activeConnections.get(callSid);
-            if (connection) {
+            if (connection && type !== "lara") {
               console.log("Trascrizione:", connection.transcript);
               const analisi = await analizzaTrascrizione(connection.transcript.join(' '));
               console.log("Risultato analisi OpenAI:", analisi);
