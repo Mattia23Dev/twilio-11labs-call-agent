@@ -9,6 +9,7 @@ export function registerOutboundRoutes(fastify) {
     ELEVENLABS_API_KEY, 
     ELEVENLABS_AGENT_ID,
     ELEVENLABS_AGENT_ID_BLUDENTAL,
+    ELEVENLABS_AGENT_ID_LARA,
     TWILIO_ACCOUNT_SID,
     TWILIO_AUTH_TOKEN,
     TWILIO_PHONE_NUMBER
@@ -26,7 +27,7 @@ export function registerOutboundRoutes(fastify) {
   async function getSignedUrl({type}) {
     try {
       const response = await fetch(
-        `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${type && type == "bludental" ? ELEVENLABS_AGENT_ID_BLUDENTAL : ELEVENLABS_AGENT_ID}`,
+        `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${type === "bludental" ? ELEVENLABS_AGENT_ID_BLUDENTAL : type === "lara" ? ELEVENLABS_AGENT_ID_LARA : ELEVENLABS_AGENT_ID}`,
         {
           method: 'GET',
           headers: {
